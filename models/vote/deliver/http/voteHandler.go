@@ -18,5 +18,5 @@ func NewVoteHttpHandler(g *echo.Group, usecase usecase.VoteUsecase) {
 	handler := VoteHttpHandler{
 		VoteUsecase: usecase,
 	}
-	g.GET("/", handler.Get)
+	g.GET("", handler.Get)
 }

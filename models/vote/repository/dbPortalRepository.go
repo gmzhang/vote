@@ -1,15 +1,10 @@
 package repository
 
 import (
-	"encoding/json"
-	"fmt"
 	"vote/utils"
-	"strconv"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	"vote/models/vote"
-	"mudutv/web/models/portal"
 )
 
 func NewVoteRepositoryFromDB(conn *sqlx.DB) VoteRepository {

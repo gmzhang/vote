@@ -37,12 +37,13 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello World")
+		return c.String(http.StatusOK, "ok")
 	})
 
-	activity := e.Group("/api")
-	ctl.Dispatch(activity)
+	routeVoteGroup := e.Group("/api/vote")
+	ctl.Dispatch(routeVoteGroup)
 
-	e.Logger.Fatal(e.Start(":80"))
+	e.Logger.Fatal(e.Start(":8088"))
 }

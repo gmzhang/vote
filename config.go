@@ -3,7 +3,7 @@ package web
 import (
 	"encoding/json"
 	"log"
-	"mudutv/web/utils"
+	"vote/utils"
 	"os"
 )
 
