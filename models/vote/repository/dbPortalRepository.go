@@ -5,6 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"vote/models/vote"
+	"fmt"
 )
 
 func NewVoteRepositoryFromDB(conn *sqlx.DB) VoteRepository {
@@ -18,13 +19,53 @@ type mysqlVoteRepos struct {
 func (m *mysqlVoteRepos) Get() []vote.Vote {
 	sql := "select id, name from vote"
 
-	Votes := []vote.Vote{}
-	err := m.Conn.Select(&Votes, sql)
-
+	votes := []vote.Vote{}
+	err := m.Conn.Select(&votes, sql)
 	if err != nil {
 		utils.Logger.WithField("err", err).Errorln("Get Vote Error")
 		return nil
 	}
-	return Votes
-}
 
+	for voteKey, voteVal := range votes {
+
+		voteRecordCountSql := "SELECT count(*) FROM vote_record WHERE vote_id = ?"
+		voteRecordCount := utils.RowCount(voteRecordCountSql, voteVal.ID) //总投票数
+
+		questionsSql := "SELECT id, vote_id, name FROM vote_question  WHERE vote_id = ?"
+		questions := []vote.VoteQuestion{}
+		err = m.Conn.Select(&questions, questionsSql, voteVal.ID)
+		if err != nil {
+			utils.Logger.WithField("err", err).Errorln("Get Vote Question Error")
+			return nil
+		}
+
+		for questionKey, questionVal := range questions {
+			itemSql := "SELECT * FROM vote_question_item where vote_id = ? and question_id = ?"
+			items := []vote.VoteQuestionItem{}
+			err = m.Conn.Select(&items, itemSql, voteVal.ID, questionVal.ID)
+			if err != nil {
+				utils.Logger.WithField("err", err).Errorln("Get Vote Question Item Error")
+				return nil
+			}
+
+			for itemKey, itemVal := range items {
+				itemCountSql := "SELECT count(*) FROM vote_record WHERE vote_id = ? and question_id = ? and item_id = ?"
+				itemCount := utils.RowCount(itemCountSql, voteVal.ID, questionVal.ID, itemVal.ID)
+
+				if voteRecordCount == 0 {
+					items[itemKey].Percent = "0%";
+					items[itemKey].Sum = 0;
+				} else {
+					itemPercent := float64(itemCount) / float64(voteRecordCount) * 100
+					items[itemKey].Sum = itemCount
+					items[itemKey].Percent = fmt.Sprintf("%.2f", itemPercent) + "%"
+				}
+			}
+			questions[questionKey].Items = items
+		}
+
+		votes[voteKey].Questions = questions
+	}
+
+	return votes
+}
