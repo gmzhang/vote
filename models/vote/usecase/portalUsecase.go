@@ -7,6 +7,7 @@ import (
 
 type VoteUsecase interface {
 	Get() []vote.Vote
+	PostVote(postVotes []vote.PostVote, visitorId string) error
 }
 
 type voteUsecase struct {
@@ -19,4 +20,8 @@ func NewVoteUsecase(repos repository.VoteRepository) VoteUsecase {
 
 func (v *voteUsecase) Get() []vote.Vote {
 	return v.voteRepos.Get()
+}
+
+func (v *voteUsecase) PostVote(postVotes []vote.PostVote, visitorId string) error {
+	return v.voteRepos.PostVote(postVotes, visitorId)
 }

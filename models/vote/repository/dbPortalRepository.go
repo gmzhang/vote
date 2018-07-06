@@ -69,3 +69,24 @@ func (m *mysqlVoteRepos) Get() []vote.Vote {
 
 	return votes
 }
+
+func (m *mysqlVoteRepos) PostVote(postVotes []vote.PostVote, visitorId string) error {
+
+	for _, postVal := range postVotes {
+
+		sqlRecord := "INSERT into vote_record (vote_id,question_id,item_id,visitor_id)" +
+			" VALUES (:vote_id,:question_id,:item_id,:visitor_id)"
+		data := map[string]interface{}{
+			"vote_id":     postVal.VoteID,
+			"question_id": postVal.QuestionID,
+			"item_id":     postVal.ItemID,
+			"visitor_id":  visitorId,
+		}
+		_, err := utils.DB.NamedExec(sqlRecord, data)
+		if err != nil {
+			utils.Logger.WithError(err).Println("insert vote_record error")
+			return err
+		}
+	}
+	return nil
+}

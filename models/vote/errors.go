@@ -4,5 +4,4 @@ import (
 	"errors"
 )
 
-var ErrVisitorNotFinishedOrWrong = errors.New("visitor not finished all question or wrong")
-var ErrUndefine = errors.New("undefine")
+var ErrorParams = errors.New("参数错误")
